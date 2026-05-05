@@ -2,10 +2,15 @@ const tracks = [
     "SPA",
     "MONZA",
     "SILVERSTONE",
-    "NURBURGRING",
+    "NURBURGRING GP",
     "BAHRAIN",
     "MONACO",
-    "ATLANTA"
+    "ATLANTA",
+    "HOCKENHEIMRING",
+    "NORDSCHLEIFE",
+    "DAYTONA",
+    "FUJI",
+    "JEDDAH",
 ];
 
 const games = [
