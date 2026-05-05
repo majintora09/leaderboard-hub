@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Backfish Racers Board</title>
-    <link rel="stylesheet" href="{{ asset('styles.css') }}">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 
@@ -31,6 +31,6 @@
     <div id="leaderboard"></div>
 </div>
 
-<script src="{{ asset('scripts.js') }}"></script>
+<script src="/scripts.js"></script>
 </body>
 </html>
