@@ -56,23 +56,50 @@ function populateSelects() {
         filterTrackSelect.innerHTML += `<option value="${track}">${track}</option>`;
     });
 
-    categorySelect.innerHTML = `<option value="">Select Category</option>`;
-    filterCategorySelect.innerHTML = `<option value="">All Categories</option>`;
+    populateCategoryOptions(categorySelect, "Select Category");
+    populateCategoryOptions(filterCategorySelect, "All Categories");
+}
+
+function populateCategoryOptions(selectElement, defaultText) {
+    selectElement.innerHTML = `<option value="">${defaultText}</option>`;
 
     categories.forEach(category => {
-        categorySelect.innerHTML += `<option value="${category}">${category}</option>`;
-        filterCategorySelect.innerHTML += `<option value="${category}">${category}</option>`;
+        selectElement.innerHTML += `<option value="${category}">${category}</option>`;
     });
+}
+
+function lockCategoryIfF1() {
+    if (gameSelect.value === "F1 25") {
+        categorySelect.value = "FORMULA 1";
+        categorySelect.disabled = true;
+    } else {
+        categorySelect.disabled = false;
+
+        if (categorySelect.value === "FORMULA 1") {
+            categorySelect.value = "";
+        }
+    }
+}
+
+function lockFilterCategoryIfF1() {
+    if (filterGameSelect.value === "F1 25") {
+        filterCategorySelect.value = "FORMULA 1";
+        filterCategorySelect.disabled = true;
+    } else {
+        filterCategorySelect.disabled = false;
+    }
+
+    renderLeaderboard();
 }
 
 async function loadResults() {
     const response = await fetch("/api/results");
     results = await response.json();
 
-    // quick fix for old test entries that had no category
     results = results.map(result => ({
         ...result,
-        category: result.category || "GT3"
+        category: result.category || "GT3",
+        time: formatTime(result.time)
     }));
 
     renderLeaderboard();
@@ -101,10 +128,14 @@ form.addEventListener("submit", async function(event) {
     });
 
     form.reset();
+    categorySelect.disabled = false;
+
     await loadResults();
 });
 
-filterGameSelect.addEventListener("change", renderLeaderboard);
+gameSelect.addEventListener("change", lockCategoryIfF1);
+
+filterGameSelect.addEventListener("change", lockFilterCategoryIfF1);
 filterTrackSelect.addEventListener("change", renderLeaderboard);
 filterCategorySelect.addEventListener("change", renderLeaderboard);
 
@@ -148,8 +179,10 @@ function renderLeaderboard() {
         const row = document.createElement("div");
         row.className = "player";
 
+        const rankClass = getRankClass(result.categoryRank);
+
         row.innerHTML = `
-            <span class="rank">#${result.categoryRank}</span>
+            <span class="rank ${rankClass}">#${result.categoryRank}</span>
             <span class="name">${result.name}</span>
             <span class="time">${formatTime(result.time)}</span>
             <span class="track">${result.track}</span>
@@ -160,6 +193,13 @@ function renderLeaderboard() {
 
         leaderboard.appendChild(row);
     });
+}
+
+function getRankClass(rank) {
+    if (rank === 1) return "first";
+    if (rank === 2) return "second";
+    if (rank === 3) return "third";
+    return "";
 }
 
 function getCategoryRank(targetResult) {
@@ -189,7 +229,7 @@ async function deleteResult(id) {
 }
 
 function convertTimeToMilliseconds(time) {
-    const clean = String(time).trim();
+    const clean = String(time).trim().replace(",", ".");
 
     if (clean.includes(":")) {
         const parts = clean.split(":");
