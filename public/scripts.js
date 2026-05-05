@@ -169,7 +169,7 @@ function renderLeaderboard() {
     if (visibleResults.length === 0) {
         leaderboard.innerHTML = `
             <div class="empty-message">
-                No results found
+                No results found yet. Add a lap time or change the filters.
             </div>
         `;
         return;
