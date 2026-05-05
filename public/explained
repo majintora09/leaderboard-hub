@@ -1,0 +1,23 @@
+You submit time
+- JavaScript catches the form
+- fetch("/api/results") sends it to Laravel
+- ResultController receives it
+- Result model saves it
+- MySQL stores it permanently
+- JS reloads results from database
+- leaderboard updates
+
+
+Laravel     -*- Backend
+MySQL       -*- Memory
+HTML/CSS/JS -*- Frontend
+
+
+Leaderboard
+-formats time cleanly
+-sorts fastest first
+-calculates rank inside its own category
+-shows all results when filters are All
+-keeps ranks correct per game/track/category
+-lets you delete results
+-saves permanently in database
