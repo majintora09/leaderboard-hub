@@ -18,4 +18,4 @@ RUN php artisan config:clear
 RUN php artisan route:clear
 RUN php artisan view:clear
 
-CMD php artisan serve --host=0.0.0.0 --port=${PORT}
+CMD sh -c "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
