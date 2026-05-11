@@ -1,18 +1,40 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Comment;
+use Illuminate\Http\Request;
 
-class Result extends Model
+class CommentController extends Controller
 {
-    protected $fillable = [
-        'name',
-        'game',
-        'track',
-        'category',
-        'time',
-        'description',
-        'has_recording',
-    ];
+    public function index()
+    {
+        return Comment::latest()->get();
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'result_id' => 'required|exists:results,id',
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $validated['user_id'] = $request->user()->id;
+        $validated['name'] = $request->user()->name;
+
+        return Comment::create($validated);
+    }
+
+    public function destroy(Comment $comment)
+    {
+        if ($comment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $comment->delete();
+
+        return response()->json([
+            'message' => 'Comment deleted'
+        ]);
+    }
 }

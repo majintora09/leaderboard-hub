@@ -16,15 +16,21 @@ class CommentController extends Controller
     {
         $validated = $request->validate([
             'result_id' => 'required|exists:results,id',
-            'name' => 'required|string|max:255',
             'message' => 'required|string|max:1000',
         ]);
+
+        $validated['user_id'] = $request->user()->id;
+        $validated['name'] = $request->user()->name;
 
         return Comment::create($validated);
     }
 
     public function destroy(Comment $comment)
     {
+        if ($comment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $comment->delete();
 
         return response()->json([

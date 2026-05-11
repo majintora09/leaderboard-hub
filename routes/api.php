@@ -1,13 +1,8 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ResultController;
-use App\Http\Controllers\CommentController;
 
-Route::get('/results', [ResultController::class, 'index']);
-Route::post('/results', [ResultController::class, 'store']);
-Route::delete('/results/{result}', [ResultController::class, 'destroy']);
-
-Route::get('/comments', [CommentController::class, 'index']);
-Route::post('/comments', [CommentController::class, 'store']);
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');

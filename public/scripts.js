@@ -23,10 +23,11 @@ const categories = [
     "FORMULA 1"
 ];
 
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
 const form = document.getElementById("resultForm");
 const leaderboard = document.getElementById("leaderboard");
 
-const playerNameInput = document.getElementById("playerName");
 const playerTimeInput = document.getElementById("playerTime");
 const resultDescriptionInput = document.getElementById("resultDescription");
 const hasRecordingInput = document.getElementById("hasRecording");
@@ -49,23 +50,38 @@ let results = [];
 let comments = [];
 
 function populateSelects() {
-    gameSelect.innerHTML = `<option value="">Select Game</option>`;
+    if (gameSelect) {
+        gameSelect.innerHTML = `<option value="">Select Game</option>`;
+    }
+
     filterGameSelect.innerHTML = `<option value="">All Games</option>`;
 
     games.forEach(game => {
-        gameSelect.innerHTML += `<option value="${game}">${game}</option>`;
+        if (gameSelect) {
+            gameSelect.innerHTML += `<option value="${game}">${game}</option>`;
+        }
+
         filterGameSelect.innerHTML += `<option value="${game}">${game}</option>`;
     });
 
-    trackSelect.innerHTML = `<option value="">Select Track</option>`;
+    if (trackSelect) {
+        trackSelect.innerHTML = `<option value="">Select Track</option>`;
+    }
+
     filterTrackSelect.innerHTML = `<option value="">All Tracks</option>`;
 
     tracks.forEach(track => {
-        trackSelect.innerHTML += `<option value="${track}">${track}</option>`;
+        if (trackSelect) {
+            trackSelect.innerHTML += `<option value="${track}">${track}</option>`;
+        }
+
         filterTrackSelect.innerHTML += `<option value="${track}">${track}</option>`;
     });
 
-    populateCategoryOptions(categorySelect, "Select Category");
+    if (categorySelect) {
+        populateCategoryOptions(categorySelect, "Select Category");
+    }
+
     populateCategoryOptions(filterCategorySelect, "All Categories");
 }
 
@@ -78,6 +94,10 @@ function populateCategoryOptions(selectElement, defaultText) {
 }
 
 function lockCategoryIfF1() {
+    if (!gameSelect || !categorySelect) {
+        return;
+    }
+
     if (gameSelect.value === "F1 25") {
         categorySelect.value = "FORMULA 1";
         categorySelect.disabled = true;
@@ -110,6 +130,7 @@ async function loadResults() {
         category: result.category || "GT3",
         description: result.description || "",
         has_recording: Boolean(result.has_recording),
+        user_id: result.user_id ? Number(result.user_id) : null,
         time: formatTime(result.time)
     }));
 
@@ -121,42 +142,55 @@ async function loadComments() {
     const response = await fetch("/api/comments");
     comments = await response.json();
 
+    comments = comments.map(comment => ({
+        ...comment,
+        user_id: comment.user_id ? Number(comment.user_id) : null,
+        result_id: comment.result_id ? Number(comment.result_id) : null
+    }));
+
     updateStats();
     renderLeaderboard();
 }
 
-form.addEventListener("submit", async function(event) {
-    event.preventDefault();
+if (form) {
+    form.addEventListener("submit", async function(event) {
+        event.preventDefault();
 
-    const formattedTime = formatTime(playerTimeInput.value);
+        const formattedTime = formatTime(playerTimeInput.value);
 
-    const newResult = {
-        name: playerNameInput.value.toUpperCase(),
-        game: gameSelect.value,
-        track: trackSelect.value,
-        category: categorySelect.value,
-        time: formattedTime,
-        description: resultDescriptionInput.value,
-        has_recording: hasRecordingInput.checked
-    };
+        const newResult = {
+            game: gameSelect.value,
+            track: trackSelect.value,
+            category: categorySelect.value,
+            time: formattedTime,
+            description: resultDescriptionInput.value,
+            has_recording: hasRecordingInput.checked
+        };
 
-    await fetch("/api/results", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify(newResult)
+        await fetch("/api/results", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": csrfToken
+            },
+            body: JSON.stringify(newResult)
+        });
+
+        form.reset();
+
+        if (categorySelect) {
+            categorySelect.disabled = false;
+        }
+
+        await loadResults();
+        await loadComments();
     });
+}
 
-    form.reset();
-    categorySelect.disabled = false;
-
-    await loadResults();
-    await loadComments();
-});
-
-gameSelect.addEventListener("change", lockCategoryIfF1);
+if (gameSelect) {
+    gameSelect.addEventListener("change", lockCategoryIfF1);
+}
 
 filterGameSelect.addEventListener("change", lockFilterCategoryIfF1);
 filterTrackSelect.addEventListener("change", renderLeaderboard);
@@ -211,6 +245,7 @@ function renderLeaderboard() {
         wrapper.className = "result-card";
 
         const rankClass = getRankClass(result.categoryRank);
+        const canDeleteResult = window.isLoggedIn && Number(result.user_id) === Number(window.currentUserId);
 
         wrapper.innerHTML = `
             <div class="player">
@@ -229,7 +264,12 @@ function renderLeaderboard() {
                     <button class="comment-toggle" onclick="toggleComments(${result.id})">
                         Comments (${resultComments.length})
                     </button>
-                    <button class="delete-btn" onclick="deleteResult(${result.id})">X</button>
+
+                    ${
+            canDeleteResult
+                ? `<button class="delete-btn" onclick="deleteResult(${result.id})">X</button>`
+                : ""
+        }
                 </div>
 
                 ${
@@ -240,26 +280,46 @@ function renderLeaderboard() {
             </div>
 
             <div class="comment-panel" id="comments-${result.id}">
-                <form class="inline-comment-form" onsubmit="submitLapComment(event, ${result.id})">
-                    <input type="text" name="name" placeholder="Your name" required>
-                    <input type="text" name="message" placeholder="Reply like Reddit trash talk..." required>
-                    <button type="submit">Reply</button>
-                </form>
+                ${
+            window.isLoggedIn
+                ? `
+                            <form class="inline-comment-form" onsubmit="submitLapComment(event, ${result.id})">
+                                <input type="text" name="message" placeholder="Reply like Reddit trash talk..." required>
+                                <button type="submit">Reply</button>
+                            </form>
+                        `
+                : `
+                            <div class="empty-message">
+                                Login to comment.
+                            </div>
+                        `
+        }
 
                 <div>
                     ${
             resultComments.length === 0
                 ? `<div class="empty-message">No comments yet.</div>`
-                : resultComments.map(comment => `
-                                <div class="lap-comment">
-                                    <div class="comment-top">
-                                        <span class="comment-name">${escapeHTML(comment.name)}</span>
-                                        <span class="comment-date">${formatDate(comment.created_at)}</span>
+                : resultComments.map(comment => {
+                    const canDeleteComment =
+                        window.isLoggedIn &&
+                        Number(comment.user_id) === Number(window.currentUserId);
+
+                    return `
+                                    <div class="lap-comment">
+                                        <div class="comment-top">
+                                            <span class="comment-name">${escapeHTML(comment.name)}</span>
+                                            <span class="comment-date">${formatDate(comment.created_at)}</span>
+                                        </div>
+                                        <div class="comment-message">${escapeHTML(comment.message)}</div>
+
+                                        ${
+                        canDeleteComment
+                            ? `<button class="comment-delete" onclick="deleteComment(${comment.id})">Delete</button>`
+                            : ""
+                    }
                                     </div>
-                                    <div class="comment-message">${escapeHTML(comment.message)}</div>
-                                    <button class="comment-delete" onclick="deleteComment(${comment.id})">Delete</button>
-                                </div>
-                            `).join("")
+                                `;
+                }).join("")
         }
                 </div>
             </div>
@@ -293,7 +353,6 @@ async function submitLapComment(event, resultId) {
 
     const newComment = {
         result_id: resultId,
-        name: formData.get("name").toUpperCase(),
         message: formData.get("message")
     };
 
@@ -301,7 +360,8 @@ async function submitLapComment(event, resultId) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "X-CSRF-TOKEN": csrfToken
         },
         body: JSON.stringify(newComment)
     });
@@ -312,6 +372,7 @@ async function submitLapComment(event, resultId) {
 
     setTimeout(() => {
         const panel = document.getElementById(`comments-${resultId}`);
+
         if (panel) {
             panel.classList.add("open");
         }
@@ -344,7 +405,8 @@ async function deleteResult(id) {
     await fetch(`/api/results/${id}`, {
         method: "DELETE",
         headers: {
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "X-CSRF-TOKEN": csrfToken
         }
     });
 
@@ -356,7 +418,8 @@ async function deleteComment(id) {
     await fetch(`/api/comments/${id}`, {
         method: "DELETE",
         headers: {
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "X-CSRF-TOKEN": csrfToken
         }
     });
 
