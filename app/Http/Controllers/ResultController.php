@@ -31,7 +31,7 @@ class ResultController extends Controller
 
     public function destroy(Result $result)
     {
-        if ($result->user_id !== auth()->id()) {
+        if (!auth()->check() || !auth()->user()->is_admin) {
             abort(403);
         }
 

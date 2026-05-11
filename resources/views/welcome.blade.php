@@ -31,7 +31,12 @@
         @auth
             <div class="user-panel">
                 <span>Logged in as</span>
-                <strong>{{ auth()->user()->name }}</strong>
+                <strong>
+                    {{ auth()->user()->name }}
+                    @if (auth()->user()->is_admin)
+                        <em>ADMIN</em>
+                    @endif
+                </strong>
 
                 <form method="POST" action="/logout">
                     @csrf
@@ -149,6 +154,13 @@
                 <option value="recorded">Recorded only</option>
                 <option value="no-proof">No proof</option>
             </select>
+
+            <select id="filterDate">
+                <option value="">All Time</option>
+                <option value="today">Today</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="30days">Last 30 Days</option>
+            </select>
         </div>
     </section>
 
@@ -181,6 +193,7 @@
 <script>
     window.isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
     window.currentUserId = {{ auth()->check() ? auth()->id() : 'null' }};
+    window.isAdmin = {{ auth()->check() && auth()->user()->is_admin ? 'true' : 'false' }};
 </script>
 
 <script src="/scripts.js"></script>

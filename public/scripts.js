@@ -40,6 +40,7 @@ const filterGameSelect = document.getElementById("filterGame");
 const filterTrackSelect = document.getElementById("filterTrack");
 const filterCategorySelect = document.getElementById("filterCategory");
 const filterProofSelect = document.getElementById("filterProof");
+const filterDateSelect = document.getElementById("filterDate");
 
 const statTotalLaps = document.getElementById("statTotalLaps");
 const statRecordedRuns = document.getElementById("statRecordedRuns");
@@ -196,6 +197,7 @@ filterGameSelect.addEventListener("change", lockFilterCategoryIfF1);
 filterTrackSelect.addEventListener("change", renderLeaderboard);
 filterCategorySelect.addEventListener("change", renderLeaderboard);
 filterProofSelect.addEventListener("change", renderLeaderboard);
+filterDateSelect.addEventListener("change", renderLeaderboard);
 
 function renderLeaderboard() {
     leaderboard.innerHTML = "";
@@ -204,6 +206,7 @@ function renderLeaderboard() {
     const selectedTrack = filterTrackSelect.value;
     const selectedCategory = filterCategorySelect.value;
     const selectedProof = filterProofSelect.value;
+    const selectedDate = filterDateSelect.value;
 
     const visibleResults = results
         .filter(result => {
@@ -216,7 +219,9 @@ function renderLeaderboard() {
                 (selectedProof === "recorded" && result.has_recording) ||
                 (selectedProof === "no-proof" && !result.has_recording);
 
-            return gameMatch && trackMatch && categoryMatch && proofMatch;
+            const dateMatch = matchesDateFilter(result.created_at, selectedDate);
+
+            return gameMatch && trackMatch && categoryMatch && proofMatch && dateMatch;
         })
         .map(result => ({
             ...result,
@@ -245,12 +250,16 @@ function renderLeaderboard() {
         wrapper.className = "result-card";
 
         const rankClass = getRankClass(result.categoryRank);
-        const canDeleteResult = window.isLoggedIn && Number(result.user_id) === Number(window.currentUserId);
 
         wrapper.innerHTML = `
             <div class="player">
                 <span class="rank ${rankClass}">#${result.categoryRank}</span>
-                <span class="name">${escapeHTML(result.name)}</span>
+
+                <span class="name">
+                    ${escapeHTML(result.name)}
+                    <small class="posted-date">${formatPostedDate(result.created_at)}</small>
+                </span>
+
                 <span class="time">${formatTime(result.time)}</span>
                 <span class="track">${escapeHTML(result.track)}</span>
                 <span class="game">${escapeHTML(result.game)}</span>
@@ -266,7 +275,7 @@ function renderLeaderboard() {
                     </button>
 
                     ${
-            canDeleteResult
+            window.isAdmin
                 ? `<button class="delete-btn" onclick="deleteResult(${result.id})">X</button>`
                 : ""
         }
@@ -300,20 +309,16 @@ function renderLeaderboard() {
             resultComments.length === 0
                 ? `<div class="empty-message">No comments yet.</div>`
                 : resultComments.map(comment => {
-                    const canDeleteComment =
-                        window.isLoggedIn &&
-                        Number(comment.user_id) === Number(window.currentUserId);
-
                     return `
                                     <div class="lap-comment">
                                         <div class="comment-top">
                                             <span class="comment-name">${escapeHTML(comment.name)}</span>
-                                            <span class="comment-date">${formatDate(comment.created_at)}</span>
+                                            <span class="comment-date">${formatPostedDate(comment.created_at)}</span>
                                         </div>
                                         <div class="comment-message">${escapeHTML(comment.message)}</div>
 
                                         ${
-                        canDeleteComment
+                        window.isAdmin
                             ? `<button class="comment-delete" onclick="deleteComment(${comment.id})">Delete</button>`
                             : ""
                     }
@@ -455,14 +460,49 @@ function formatTime(time) {
     return `${minutes}:${String(seconds).padStart(2, "0")}.${String(ms).padStart(3, "0")}`;
 }
 
-function formatDate(dateString) {
+function matchesDateFilter(dateString, filterValue) {
+    if (filterValue === "") {
+        return true;
+    }
+
+    const createdDate = new Date(dateString);
+
+    if (Number.isNaN(createdDate.getTime())) {
+        return false;
+    }
+
+    const now = new Date();
+
+    if (filterValue === "today") {
+        return createdDate.toDateString() === now.toDateString();
+    }
+
+    const diffMs = now - createdDate;
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+    if (filterValue === "7days") {
+        return diffDays <= 7;
+    }
+
+    if (filterValue === "30days") {
+        return diffDays <= 30;
+    }
+
+    return true;
+}
+
+function formatPostedDate(dateString) {
     const date = new Date(dateString);
 
     if (Number.isNaN(date.getTime())) {
         return "";
     }
 
-    return date.toLocaleString();
+    return date.toLocaleDateString(undefined, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
 }
 
 function escapeHTML(value) {
