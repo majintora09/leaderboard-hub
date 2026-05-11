@@ -3,6 +3,7 @@ const tracks = [
     "MONZA",
     "SILVERSTONE",
     "NURBURGRING",
+    "NURBURGRING GP",
     "BAHRAIN",
     "MONACO",
     "ATLANTA"
@@ -51,53 +52,64 @@ let results = [];
 let comments = [];
 
 function populateSelects() {
-    if (gameSelect) {
-        gameSelect.innerHTML = `<option value="">Select Game</option>`;
-    }
+    populateSelect(gameSelect, games, "Select Game");
+    populateSelect(filterGameSelect, games, "All Games");
 
-    filterGameSelect.innerHTML = `<option value="">All Games</option>`;
+    populateSelect(trackSelect, tracks, "Select Track");
+    populateSelect(filterTrackSelect, tracks, "All Tracks");
 
-    games.forEach(game => {
-        if (gameSelect) {
-            gameSelect.innerHTML += `<option value="${game}">${game}</option>`;
-        }
-
-        filterGameSelect.innerHTML += `<option value="${game}">${game}</option>`;
-    });
-
-    if (trackSelect) {
-        trackSelect.innerHTML = `<option value="">Select Track</option>`;
-    }
-
-    filterTrackSelect.innerHTML = `<option value="">All Tracks</option>`;
-
-    tracks.forEach(track => {
-        if (trackSelect) {
-            trackSelect.innerHTML += `<option value="${track}">${track}</option>`;
-        }
-
-        filterTrackSelect.innerHTML += `<option value="${track}">${track}</option>`;
-    });
-
-    if (categorySelect) {
-        populateCategoryOptions(categorySelect, "Select Category");
-    }
-
-    populateCategoryOptions(filterCategorySelect, "All Categories");
+    populateSelect(categorySelect, categories, "Select Category");
+    populateSelect(filterCategorySelect, categories, "All Categories");
 }
 
-function populateCategoryOptions(selectElement, defaultText) {
+function populateSelect(selectElement, values, defaultText) {
+    if (!selectElement) return;
+
     selectElement.innerHTML = `<option value="">${defaultText}</option>`;
 
-    categories.forEach(category => {
-        selectElement.innerHTML += `<option value="${category}">${category}</option>`;
+    values.forEach(value => {
+        selectElement.innerHTML += `<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`;
     });
+}
+
+function updateFilterOptionsFromResults() {
+    const resultGames = [...new Set(results.map(result => result.game).filter(Boolean))];
+    const resultTracks = [...new Set(results.map(result => result.track).filter(Boolean))];
+    const resultCategories = [...new Set(results.map(result => result.category).filter(Boolean))];
+
+    const allGames = [...new Set([...games, ...resultGames])];
+    const allTracks = [...new Set([...tracks, ...resultTracks])];
+    const allCategories = [...new Set([...categories, ...resultCategories])];
+
+    const selectedGame = filterGameSelect.value;
+    const selectedTrack = filterTrackSelect.value;
+    const selectedCategory = filterCategorySelect.value;
+
+    populateSelect(filterGameSelect, allGames, "All Games");
+    populateSelect(filterTrackSelect, allTracks, "All Tracks");
+    populateSelect(filterCategorySelect, allCategories, "All Categories");
+
+    setSelectValue(filterGameSelect, selectedGame);
+    setSelectValue(filterTrackSelect, selectedTrack);
+    setSelectValue(filterCategorySelect, selectedCategory);
+
+    if (gameSelect) populateSelect(gameSelect, allGames, "Select Game");
+    if (trackSelect) populateSelect(trackSelect, allTracks, "Select Track");
+    if (categorySelect) populateSelect(categorySelect, allCategories, "Select Category");
+}
+
+function setSelectValue(selectElement, value) {
+    if (!selectElement) return;
+
+    if (value && ![...selectElement.options].some(option => option.value === value)) {
+        selectElement.innerHTML += `<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`;
+    }
+
+    selectElement.value = value;
 }
 
 function lockCategoryIfF1() {
-    if (!gameSelect || !categorySelect) {
-        return;
-    }
+    if (!gameSelect || !categorySelect) return;
 
     if (gameSelect.value === "F1 25") {
         categorySelect.value = "FORMULA 1";
@@ -113,7 +125,7 @@ function lockCategoryIfF1() {
 
 function lockFilterCategoryIfF1() {
     if (filterGameSelect.value === "F1 25") {
-        filterCategorySelect.value = "FORMULA 1";
+        setSelectValue(filterCategorySelect, "FORMULA 1");
         filterCategorySelect.disabled = true;
     } else {
         filterCategorySelect.disabled = false;
@@ -135,6 +147,7 @@ async function loadResults() {
         time: formatTime(result.time)
     }));
 
+    updateFilterOptionsFromResults();
     updateStats();
     renderLeaderboard();
 }
@@ -198,6 +211,17 @@ filterTrackSelect.addEventListener("change", renderLeaderboard);
 filterCategorySelect.addEventListener("change", renderLeaderboard);
 filterProofSelect.addEventListener("change", renderLeaderboard);
 filterDateSelect.addEventListener("change", renderLeaderboard);
+
+leaderboard.addEventListener("click", function(event) {
+    const clickedTag = event.target.closest(".tag-button");
+
+    if (!clickedTag) return;
+
+    const type = clickedTag.dataset.filterType;
+    const value = clickedTag.dataset.filterValue;
+
+    filterBy(type, value);
+});
 
 function renderLeaderboard() {
     leaderboard.innerHTML = "";
@@ -264,30 +288,30 @@ function renderLeaderboard() {
 
                 <span class="time">${formatTime(result.time)}</span>
 
-                <button class="track tag-button" onclick="filterBy('track', '${escapeAttribute(result.track)}')">
+                <button type="button" class="track tag-button" data-filter-type="track" data-filter-value="${escapeHTML(result.track)}">
                     ${escapeHTML(result.track)}
                 </button>
 
-                <button class="game tag-button" onclick="filterBy('game', '${escapeAttribute(result.game)}')">
+                <button type="button" class="game tag-button" data-filter-type="game" data-filter-value="${escapeHTML(result.game)}">
                     ${escapeHTML(result.game)}
                 </button>
 
-                <button class="category tag-button" onclick="filterBy('category', '${escapeAttribute(result.category)}')">
+                <button type="button" class="category tag-button" data-filter-type="category" data-filter-value="${escapeHTML(result.category)}">
                     ${escapeHTML(result.category)}
                 </button>
 
-                <button class="${result.has_recording ? "recording-badge" : "no-recording-badge"} tag-button" onclick="filterBy('proof', '${proofValue}')">
+                <button type="button" class="${result.has_recording ? "recording-badge" : "no-recording-badge"} tag-button" data-filter-type="proof" data-filter-value="${proofValue}">
                     ${proofLabel}
                 </button>
 
                 <div class="actions">
-                    <button class="comment-toggle" onclick="toggleComments(${result.id})">
+                    <button type="button" class="comment-toggle" onclick="toggleComments(${result.id})">
                         Comments (${resultComments.length})
                     </button>
 
                     ${
             window.isAdmin
-                ? `<button class="delete-btn" onclick="deleteResult(${result.id})">X</button>`
+                ? `<button type="button" class="delete-btn" onclick="deleteResult(${result.id})">X</button>`
                 : ""
         }
                 </div>
@@ -347,20 +371,20 @@ function renderLeaderboard() {
 
 function filterBy(type, value) {
     if (type === "game") {
-        filterGameSelect.value = value;
+        setSelectValue(filterGameSelect, value);
         lockFilterCategoryIfF1();
     }
 
     if (type === "track") {
-        filterTrackSelect.value = value;
+        setSelectValue(filterTrackSelect, value);
     }
 
     if (type === "category") {
-        filterCategorySelect.value = value;
+        setSelectValue(filterCategorySelect, value);
     }
 
     if (type === "proof") {
-        filterProofSelect.value = value;
+        setSelectValue(filterProofSelect, value);
     }
 
     renderLeaderboard();
@@ -549,13 +573,6 @@ function escapeHTML(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-}
-
-function escapeAttribute(value) {
-    return String(value)
-        .replaceAll("\\", "\\\\")
-        .replaceAll("'", "\\'")
-        .replaceAll('"', "&quot;");
 }
 
 populateSelects();
