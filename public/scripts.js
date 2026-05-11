@@ -250,6 +250,8 @@ function renderLeaderboard() {
         wrapper.className = "result-card";
 
         const rankClass = getRankClass(result.categoryRank);
+        const proofValue = result.has_recording ? "recorded" : "no-proof";
+        const proofLabel = result.has_recording ? "✓ Recorded" : "No proof";
 
         wrapper.innerHTML = `
             <div class="player">
@@ -261,13 +263,22 @@ function renderLeaderboard() {
                 </span>
 
                 <span class="time">${formatTime(result.time)}</span>
-                <span class="track">${escapeHTML(result.track)}</span>
-                <span class="game">${escapeHTML(result.game)}</span>
-                <span class="category">${escapeHTML(result.category)}</span>
 
-                <span class="${result.has_recording ? "recording-badge" : "no-recording-badge"}">
-                    ${result.has_recording ? "✓ Recorded" : "No proof"}
-                </span>
+                <button class="track tag-button" onclick="filterBy('track', '${escapeAttribute(result.track)}')">
+                    ${escapeHTML(result.track)}
+                </button>
+
+                <button class="game tag-button" onclick="filterBy('game', '${escapeAttribute(result.game)}')">
+                    ${escapeHTML(result.game)}
+                </button>
+
+                <button class="category tag-button" onclick="filterBy('category', '${escapeAttribute(result.category)}')">
+                    ${escapeHTML(result.category)}
+                </button>
+
+                <button class="${result.has_recording ? "recording-badge" : "no-recording-badge"} tag-button" onclick="filterBy('proof', '${proofValue}')">
+                    ${proofLabel}
+                </button>
 
                 <div class="actions">
                     <button class="comment-toggle" onclick="toggleComments(${result.id})">
@@ -331,6 +342,32 @@ function renderLeaderboard() {
         `;
 
         leaderboard.appendChild(wrapper);
+    });
+}
+
+function filterBy(type, value) {
+    if (type === "game") {
+        filterGameSelect.value = value;
+        lockFilterCategoryIfF1();
+    }
+
+    if (type === "track") {
+        filterTrackSelect.value = value;
+    }
+
+    if (type === "category") {
+        filterCategorySelect.value = value;
+    }
+
+    if (type === "proof") {
+        filterProofSelect.value = value;
+    }
+
+    renderLeaderboard();
+
+    document.querySelector(".leaderboard-card").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
     });
 }
 
@@ -512,6 +549,13 @@ function escapeHTML(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+}
+
+function escapeAttribute(value) {
+    return String(value)
+        .replaceAll("\\", "\\\\")
+        .replaceAll("'", "\\'")
+        .replaceAll('"', "&quot;");
 }
 
 populateSelects();

@@ -643,3 +643,14 @@ button:hover {
         grid-template-columns: 1fr;
     }
 }
+
+.tag-button {
+    border: 1px solid currentColor;
+    cursor: pointer;
+    text-align: left;
+}
+
+.tag-button:hover {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+}
