@@ -29,7 +29,7 @@
     <section class="card">
         <div class="section-header">
             <h2>Add Result</h2>
-            <p>Submit a new lap time to the board.</p>
+            <p>Submit a lap time, notes, and whether you have proof.</p>
         </div>
 
         <form id="resultForm">
@@ -39,6 +39,13 @@
             <select id="gameTrack" required></select>
             <select id="gameName" required></select>
             <select id="categoryName" required></select>
+
+            <textarea id="resultDescription" placeholder="Description / notes / setup / excuses..."></textarea>
+
+            <label class="checkbox-field">
+                <input type="checkbox" id="hasRecording">
+                <span>Recording available</span>
+            </label>
 
             <button type="submit">Add Result</button>
         </form>
@@ -60,7 +67,7 @@
     <section class="card leaderboard-card">
         <div class="section-header">
             <h2>Leaderboard</h2>
-            <p>Ranks are calculated inside each game / track / category.</p>
+            <p>Ranks are calculated inside each game / track / category. Comments open Reddit-style under each lap.</p>
         </div>
 
         <div class="leaderboard-header">
@@ -70,25 +77,11 @@
             <span>Track</span>
             <span>Game</span>
             <span>Class</span>
+            <span>Proof</span>
             <span>Action</span>
         </div>
 
         <div id="leaderboard"></div>
-    </section>
-
-    <section class="card comments-card">
-        <div class="section-header">
-            <h2>Backfish Comments</h2>
-            <p>Talk your shit. Keep it funny.</p>
-        </div>
-
-        <form id="commentForm" class="comment-form">
-            <input type="text" id="commentName" placeholder="Your name" required>
-            <textarea id="commentMessage" placeholder="wtf bruh u did a 1:58.4 in GP layout??" required></textarea>
-            <button type="submit">Post Comment</button>
-        </form>
-
-        <div id="comments"></div>
     </section>
 
 </div>

@@ -157,6 +157,21 @@ button:hover {
     box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
 }
 
+.checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(226, 232, 240, 0.96);
+    color: #0f172a;
+    padding: 15px;
+    border-radius: 14px;
+    font-weight: bold;
+}
+
+.checkbox-field input {
+    width: auto;
+}
+
 .leaderboard-card {
     padding-bottom: 0;
     overflow: hidden;
@@ -165,7 +180,7 @@ button:hover {
 .leaderboard-header,
 .player {
     display: grid;
-    grid-template-columns: 70px 1fr 1fr 1fr 1fr 1fr 90px;
+    grid-template-columns: 70px 1fr 1fr 1fr 1fr 1fr 100px 90px;
     gap: 12px;
     align-items: center;
 }
@@ -186,14 +201,17 @@ button:hover {
     background: rgba(15, 23, 42, 0.15);
 }
 
-.player {
-    padding: 17px 16px;
+.result-card {
     border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-    transition: background 0.15s ease;
 }
 
-.player:last-child {
+.result-card:last-child {
     border-bottom: none;
+}
+
+.player {
+    padding: 17px 16px;
+    transition: background 0.15s ease;
 }
 
 .player:hover {
@@ -241,6 +259,42 @@ button:hover {
     color: #c084fc;
 }
 
+.result-description {
+    grid-column: 1 / -1;
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.45;
+    margin-top: -4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(2, 6, 23, 0.25);
+}
+
+.recording-badge {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.no-recording-badge {
+    color: #94a3b8;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.comment-toggle {
+    background: rgba(59, 130, 246, 0.18);
+    color: #bfdbfe;
+    padding: 9px 10px;
+    font-size: 13px;
+}
+
+.comment-toggle:hover {
+    box-shadow: 0 12px 28px rgba(59, 130, 246, 0.18);
+}
+
 .delete-btn {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     padding: 9px 12px;
@@ -251,28 +305,30 @@ button:hover {
     box-shadow: 0 12px 28px rgba(239, 68, 68, 0.28);
 }
 
-.empty-message {
-    padding: 28px;
-    text-align: center;
-    color: #94a3b8;
-}
-
-.comment-form {
-    grid-template-columns: 220px 1fr 160px;
-    align-items: stretch;
-}
-
-#comments {
-    margin-top: 18px;
-    display: grid;
-    gap: 12px;
-}
-
-.comment {
+.comment-panel {
+    display: none;
     padding: 16px;
-    border-radius: 16px;
-    background: rgba(2, 6, 23, 0.38);
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: rgba(2, 6, 23, 0.34);
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.comment-panel.open {
+    display: block;
+}
+
+.inline-comment-form {
+    display: grid;
+    grid-template-columns: 180px 1fr 130px;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.lap-comment {
+    padding: 12px;
+    border-left: 3px solid rgba(59, 130, 246, 0.55);
+    background: rgba(15, 23, 42, 0.65);
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
 
 .comment-top {
@@ -306,16 +362,13 @@ button:hover {
     font-size: 13px;
 }
 
-@media (max-width: 850px) {
-    .hero {
-        flex-direction: column;
-        text-align: center;
-    }
+.empty-message {
+    padding: 28px;
+    text-align: center;
+    color: #94a3b8;
+}
 
-    h1 {
-        font-size: 32px;
-    }
-
+@media (max-width: 950px) {
     .leaderboard-header {
         display: none;
     }
@@ -338,12 +391,23 @@ button:hover {
     .game::before { content: "Game: "; }
     .category::before { content: "Class: "; }
 
-    .delete-btn {
-        margin-top: 8px;
+    .actions {
+        flex-direction: column;
     }
 
-    .comment-form {
+    .inline-comment-form {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 850px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 32px;
     }
 }
 

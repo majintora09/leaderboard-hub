@@ -28,6 +28,8 @@ const leaderboard = document.getElementById("leaderboard");
 
 const playerNameInput = document.getElementById("playerName");
 const playerTimeInput = document.getElementById("playerTime");
+const resultDescriptionInput = document.getElementById("resultDescription");
+const hasRecordingInput = document.getElementById("hasRecording");
 
 const gameSelect = document.getElementById("gameName");
 const trackSelect = document.getElementById("gameTrack");
@@ -36,11 +38,6 @@ const categorySelect = document.getElementById("categoryName");
 const filterGameSelect = document.getElementById("filterGame");
 const filterTrackSelect = document.getElementById("filterTrack");
 const filterCategorySelect = document.getElementById("filterCategory");
-
-const commentForm = document.getElementById("commentForm");
-const commentNameInput = document.getElementById("commentName");
-const commentMessageInput = document.getElementById("commentMessage");
-const commentsContainer = document.getElementById("comments");
 
 let results = [];
 let comments = [];
@@ -105,6 +102,8 @@ async function loadResults() {
     results = results.map(result => ({
         ...result,
         category: result.category || "GT3",
+        description: result.description || "",
+        has_recording: Boolean(result.has_recording),
         time: formatTime(result.time)
     }));
 
@@ -114,7 +113,7 @@ async function loadResults() {
 async function loadComments() {
     const response = await fetch("/api/comments");
     comments = await response.json();
-    renderComments();
+    renderLeaderboard();
 }
 
 form.addEventListener("submit", async function(event) {
@@ -127,7 +126,9 @@ form.addEventListener("submit", async function(event) {
         game: gameSelect.value,
         track: trackSelect.value,
         category: categorySelect.value,
-        time: formattedTime
+        time: formattedTime,
+        description: resultDescriptionInput.value,
+        has_recording: hasRecordingInput.checked
     };
 
     await fetch("/api/results", {
@@ -143,27 +144,6 @@ form.addEventListener("submit", async function(event) {
     categorySelect.disabled = false;
 
     await loadResults();
-});
-
-commentForm.addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    const newComment = {
-        name: commentNameInput.value.toUpperCase(),
-        message: commentMessageInput.value
-    };
-
-    await fetch("/api/comments", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify(newComment)
-    });
-
-    commentForm.reset();
-
     await loadComments();
 });
 
@@ -210,52 +190,107 @@ function renderLeaderboard() {
     }
 
     visibleResults.forEach(result => {
-        const row = document.createElement("div");
-        row.className = "player";
+        const resultComments = comments.filter(comment => Number(comment.result_id) === Number(result.id));
+        const wrapper = document.createElement("div");
+        wrapper.className = "result-card";
 
         const rankClass = getRankClass(result.categoryRank);
 
-        row.innerHTML = `
-            <span class="rank ${rankClass}">#${result.categoryRank}</span>
-            <span class="name">${escapeHTML(result.name)}</span>
-            <span class="time">${formatTime(result.time)}</span>
-            <span class="track">${escapeHTML(result.track)}</span>
-            <span class="game">${escapeHTML(result.game)}</span>
-            <span class="category">${escapeHTML(result.category)}</span>
-            <button class="delete-btn" onclick="deleteResult(${result.id})">X</button>
+        wrapper.innerHTML = `
+            <div class="player">
+                <span class="rank ${rankClass}">#${result.categoryRank}</span>
+                <span class="name">${escapeHTML(result.name)}</span>
+                <span class="time">${formatTime(result.time)}</span>
+                <span class="track">${escapeHTML(result.track)}</span>
+                <span class="game">${escapeHTML(result.game)}</span>
+                <span class="category">${escapeHTML(result.category)}</span>
+
+                <span class="${result.has_recording ? "recording-badge" : "no-recording-badge"}">
+                    ${result.has_recording ? "✓ Recorded" : "No proof"}
+                </span>
+
+                <div class="actions">
+                    <button class="comment-toggle" onclick="toggleComments(${result.id})">
+                        Comments (${resultComments.length})
+                    </button>
+                    <button class="delete-btn" onclick="deleteResult(${result.id})">X</button>
+                </div>
+
+                ${
+            result.description
+                ? `<div class="result-description">${escapeHTML(result.description)}</div>`
+                : ""
+        }
+            </div>
+
+            <div class="comment-panel" id="comments-${result.id}">
+                <form class="inline-comment-form" onsubmit="submitLapComment(event, ${result.id})">
+                    <input type="text" name="name" placeholder="Your name" required>
+                    <input type="text" name="message" placeholder="Reply like Reddit trash talk..." required>
+                    <button type="submit">Reply</button>
+                </form>
+
+                <div>
+                    ${
+            resultComments.length === 0
+                ? `<div class="empty-message">No comments yet.</div>`
+                : resultComments.map(comment => `
+                                <div class="lap-comment">
+                                    <div class="comment-top">
+                                        <span class="comment-name">${escapeHTML(comment.name)}</span>
+                                        <span class="comment-date">${formatDate(comment.created_at)}</span>
+                                    </div>
+                                    <div class="comment-message">${escapeHTML(comment.message)}</div>
+                                    <button class="comment-delete" onclick="deleteComment(${comment.id})">Delete</button>
+                                </div>
+                            `).join("")
+        }
+                </div>
+            </div>
         `;
 
-        leaderboard.appendChild(row);
+        leaderboard.appendChild(wrapper);
     });
 }
 
-function renderComments() {
-    commentsContainer.innerHTML = "";
+function toggleComments(resultId) {
+    const panel = document.getElementById(`comments-${resultId}`);
 
-    if (comments.length === 0) {
-        commentsContainer.innerHTML = `
-            <div class="empty-message">
-                No comments yet. Start the trash talk.
-            </div>
-        `;
-        return;
+    if (panel) {
+        panel.classList.toggle("open");
     }
+}
 
-    comments.forEach(comment => {
-        const commentBox = document.createElement("div");
-        commentBox.className = "comment";
+async function submitLapComment(event, resultId) {
+    event.preventDefault();
 
-        commentBox.innerHTML = `
-            <div class="comment-top">
-                <span class="comment-name">${escapeHTML(comment.name)}</span>
-                <span class="comment-date">${formatDate(comment.created_at)}</span>
-            </div>
-            <div class="comment-message">${escapeHTML(comment.message)}</div>
-            <button class="comment-delete" onclick="deleteComment(${comment.id})">Delete</button>
-        `;
+    const formData = new FormData(event.target);
 
-        commentsContainer.appendChild(commentBox);
+    const newComment = {
+        result_id: resultId,
+        name: formData.get("name").toUpperCase(),
+        message: formData.get("message")
+    };
+
+    await fetch("/api/comments", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(newComment)
     });
+
+    event.target.reset();
+
+    await loadComments();
+
+    setTimeout(() => {
+        const panel = document.getElementById(`comments-${resultId}`);
+        if (panel) {
+            panel.classList.add("open");
+        }
+    }, 0);
 }
 
 function getRankClass(rank) {
@@ -289,6 +324,7 @@ async function deleteResult(id) {
     });
 
     await loadResults();
+    await loadComments();
 }
 
 async function deleteComment(id) {

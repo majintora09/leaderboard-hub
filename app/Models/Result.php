@@ -12,5 +12,7 @@ class Result extends Model
         'track',
         'category',
         'time',
+        'description',
+        'has_recording',
     ];
 }

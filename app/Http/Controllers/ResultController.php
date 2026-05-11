@@ -20,6 +20,8 @@ class ResultController extends Controller
             'track' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'time' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'has_recording' => 'boolean',
         ]);
 
         return Result::create($validated);
