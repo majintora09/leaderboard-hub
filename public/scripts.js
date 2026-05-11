@@ -38,6 +38,12 @@ const categorySelect = document.getElementById("categoryName");
 const filterGameSelect = document.getElementById("filterGame");
 const filterTrackSelect = document.getElementById("filterTrack");
 const filterCategorySelect = document.getElementById("filterCategory");
+const filterProofSelect = document.getElementById("filterProof");
+
+const statTotalLaps = document.getElementById("statTotalLaps");
+const statRecordedRuns = document.getElementById("statRecordedRuns");
+const statPlayers = document.getElementById("statPlayers");
+const statComments = document.getElementById("statComments");
 
 let results = [];
 let comments = [];
@@ -107,12 +113,15 @@ async function loadResults() {
         time: formatTime(result.time)
     }));
 
+    updateStats();
     renderLeaderboard();
 }
 
 async function loadComments() {
     const response = await fetch("/api/comments");
     comments = await response.json();
+
+    updateStats();
     renderLeaderboard();
 }
 
@@ -152,6 +161,7 @@ gameSelect.addEventListener("change", lockCategoryIfF1);
 filterGameSelect.addEventListener("change", lockFilterCategoryIfF1);
 filterTrackSelect.addEventListener("change", renderLeaderboard);
 filterCategorySelect.addEventListener("change", renderLeaderboard);
+filterProofSelect.addEventListener("change", renderLeaderboard);
 
 function renderLeaderboard() {
     leaderboard.innerHTML = "";
@@ -159,6 +169,7 @@ function renderLeaderboard() {
     const selectedGame = filterGameSelect.value;
     const selectedTrack = filterTrackSelect.value;
     const selectedCategory = filterCategorySelect.value;
+    const selectedProof = filterProofSelect.value;
 
     const visibleResults = results
         .filter(result => {
@@ -166,7 +177,12 @@ function renderLeaderboard() {
             const trackMatch = selectedTrack === "" || result.track === selectedTrack;
             const categoryMatch = selectedCategory === "" || result.category === selectedCategory;
 
-            return gameMatch && trackMatch && categoryMatch;
+            const proofMatch =
+                selectedProof === "" ||
+                (selectedProof === "recorded" && result.has_recording) ||
+                (selectedProof === "no-proof" && !result.has_recording);
+
+            return gameMatch && trackMatch && categoryMatch && proofMatch;
         })
         .map(result => ({
             ...result,
@@ -251,6 +267,15 @@ function renderLeaderboard() {
 
         leaderboard.appendChild(wrapper);
     });
+}
+
+function updateStats() {
+    const uniquePlayers = new Set(results.map(result => result.name));
+
+    statTotalLaps.textContent = results.length;
+    statRecordedRuns.textContent = results.filter(result => result.has_recording).length;
+    statPlayers.textContent = uniquePlayers.size;
+    statComments.textContent = comments.length;
 }
 
 function toggleComments(resultId) {

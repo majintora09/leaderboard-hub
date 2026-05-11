@@ -13,26 +13,57 @@
 <div class="container">
 
     <header class="hero">
-        <div class="logo-wrap">
-            <img src="{{ asset('images/backfish-logo.jpg') }}" alt="Backfish Racers Logo" class="logo">
+        <div class="hero-left">
+            <div class="logo-wrap">
+                <img src="{{ asset('images/backfish-logo.jpg') }}" alt="Backfish Racers Logo" class="logo">
+            </div>
+
+            <div class="hero-text">
+                <p class="eyebrow">🏁 Squad Lap Time Tracker</p>
+                <h1>The Backfish Racers Board</h1>
+                <p class="subtitle">
+                    Compare laps, flex proof, and roast questionable driving decisions.
+                </p>
+            </div>
         </div>
 
-        <div class="hero-text">
-            <p class="eyebrow">🏁 Squad Lap Time Tracker</p>
-            <h1>The Backfish Racers Board</h1>
-            <p class="subtitle">
-                Compare your fastest laps across games, tracks and car classes.
-            </p>
+        <div class="hero-badge">
+            <span>Live Board</span>
+            <strong>Community Runs</strong>
         </div>
     </header>
 
-    <section class="card">
-        <div class="section-header">
-            <h2>Add Result</h2>
-            <p>Submit a lap time, notes, and whether you have proof.</p>
+    <section class="stats-grid">
+        <div class="stat-card">
+            <span>Total Laps</span>
+            <strong id="statTotalLaps">0</strong>
         </div>
 
-        <form id="resultForm">
+        <div class="stat-card">
+            <span>Recorded Runs</span>
+            <strong id="statRecordedRuns">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Players</span>
+            <strong id="statPlayers">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Comments</span>
+            <strong id="statComments">0</strong>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="section-header">
+            <div>
+                <h2>Add Result</h2>
+                <p>Submit a lap time, notes, and whether you have proof.</p>
+            </div>
+        </div>
+
+        <form id="resultForm" class="result-form">
             <input type="text" id="playerName" placeholder="Player name" required>
             <input type="text" id="playerTime" placeholder="Lap time (2:17.432)" required>
 
@@ -53,21 +84,30 @@
 
     <section class="card">
         <div class="section-header">
-            <h2>Filters</h2>
-            <p>Choose what leaderboard you want to view.</p>
+            <div>
+                <h2>Filters</h2>
+                <p>Choose what leaderboard you want to view.</p>
+            </div>
         </div>
 
         <div class="filters">
             <select id="filterGame"></select>
             <select id="filterTrack"></select>
             <select id="filterCategory"></select>
+            <select id="filterProof">
+                <option value="">All Proof</option>
+                <option value="recorded">Recorded only</option>
+                <option value="no-proof">No proof</option>
+            </select>
         </div>
     </section>
 
     <section class="card leaderboard-card">
         <div class="section-header">
-            <h2>Leaderboard</h2>
-            <p>Ranks are calculated inside each game / track / category. Comments open Reddit-style under each lap.</p>
+            <div>
+                <h2>Leaderboard</h2>
+                <p>Ranks are calculated inside each game / track / category.</p>
+            </div>
         </div>
 
         <div class="leaderboard-header">
