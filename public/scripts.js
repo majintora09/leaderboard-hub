@@ -2,15 +2,10 @@ const tracks = [
     "SPA",
     "MONZA",
     "SILVERSTONE",
-    "NURBURGRING GP",
+    "NURBURGRING",
     "BAHRAIN",
     "MONACO",
-    "ATLANTA",
-    "HOCKENHEIMRING",
-    "NORDSCHLEIFE",
-    "DAYTONA",
-    "FUJI",
-    "JEDDAH",
+    "ATLANTA"
 ];
 
 const games = [
@@ -42,7 +37,13 @@ const filterGameSelect = document.getElementById("filterGame");
 const filterTrackSelect = document.getElementById("filterTrack");
 const filterCategorySelect = document.getElementById("filterCategory");
 
+const commentForm = document.getElementById("commentForm");
+const commentNameInput = document.getElementById("commentName");
+const commentMessageInput = document.getElementById("commentMessage");
+const commentsContainer = document.getElementById("comments");
+
 let results = [];
+let comments = [];
 
 function populateSelects() {
     gameSelect.innerHTML = `<option value="">Select Game</option>`;
@@ -110,6 +111,12 @@ async function loadResults() {
     renderLeaderboard();
 }
 
+async function loadComments() {
+    const response = await fetch("/api/comments");
+    comments = await response.json();
+    renderComments();
+}
+
 form.addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -136,6 +143,28 @@ form.addEventListener("submit", async function(event) {
     categorySelect.disabled = false;
 
     await loadResults();
+});
+
+commentForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const newComment = {
+        name: commentNameInput.value.toUpperCase(),
+        message: commentMessageInput.value
+    };
+
+    await fetch("/api/comments", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(newComment)
+    });
+
+    commentForm.reset();
+
+    await loadComments();
 });
 
 gameSelect.addEventListener("change", lockCategoryIfF1);
@@ -188,15 +217,44 @@ function renderLeaderboard() {
 
         row.innerHTML = `
             <span class="rank ${rankClass}">#${result.categoryRank}</span>
-            <span class="name">${result.name}</span>
+            <span class="name">${escapeHTML(result.name)}</span>
             <span class="time">${formatTime(result.time)}</span>
-            <span class="track">${result.track}</span>
-            <span class="game">${result.game}</span>
-            <span class="category">${result.category}</span>
+            <span class="track">${escapeHTML(result.track)}</span>
+            <span class="game">${escapeHTML(result.game)}</span>
+            <span class="category">${escapeHTML(result.category)}</span>
             <button class="delete-btn" onclick="deleteResult(${result.id})">X</button>
         `;
 
         leaderboard.appendChild(row);
+    });
+}
+
+function renderComments() {
+    commentsContainer.innerHTML = "";
+
+    if (comments.length === 0) {
+        commentsContainer.innerHTML = `
+            <div class="empty-message">
+                No comments yet. Start the trash talk.
+            </div>
+        `;
+        return;
+    }
+
+    comments.forEach(comment => {
+        const commentBox = document.createElement("div");
+        commentBox.className = "comment";
+
+        commentBox.innerHTML = `
+            <div class="comment-top">
+                <span class="comment-name">${escapeHTML(comment.name)}</span>
+                <span class="comment-date">${formatDate(comment.created_at)}</span>
+            </div>
+            <div class="comment-message">${escapeHTML(comment.message)}</div>
+            <button class="comment-delete" onclick="deleteComment(${comment.id})">Delete</button>
+        `;
+
+        commentsContainer.appendChild(commentBox);
     });
 }
 
@@ -233,6 +291,17 @@ async function deleteResult(id) {
     await loadResults();
 }
 
+async function deleteComment(id) {
+    await fetch(`/api/comments/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Accept": "application/json"
+        }
+    });
+
+    await loadComments();
+}
+
 function convertTimeToMilliseconds(time) {
     const clean = String(time).trim().replace(",", ".");
 
@@ -262,5 +331,25 @@ function formatTime(time) {
     return `${minutes}:${String(seconds).padStart(2, "0")}.${String(ms).padStart(3, "0")}`;
 }
 
+function formatDate(dateString) {
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    return date.toLocaleString();
+}
+
+function escapeHTML(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
 populateSelects();
 loadResults();
+loadComments();

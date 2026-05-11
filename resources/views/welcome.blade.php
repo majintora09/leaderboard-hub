@@ -14,7 +14,7 @@
 
     <header class="hero">
         <div class="logo-wrap">
-            <img src="/images/backfish-logo.jpg" alt="Backfish Racers Logo" class="logo">
+            <img src="{{ asset('images/backfish-logo.jpg') }}" alt="Backfish Racers Logo" class="logo">
         </div>
 
         <div class="hero-text">
@@ -74,6 +74,21 @@
         </div>
 
         <div id="leaderboard"></div>
+    </section>
+
+    <section class="card comments-card">
+        <div class="section-header">
+            <h2>Backfish Comments</h2>
+            <p>Talk your shit. Keep it funny.</p>
+        </div>
+
+        <form id="commentForm" class="comment-form">
+            <input type="text" id="commentName" placeholder="Your name" required>
+            <textarea id="commentMessage" placeholder="wtf bruh u did a 1:58.4 in GP layout??" required></textarea>
+            <button type="submit">Post Comment</button>
+        </form>
+
+        <div id="comments"></div>
     </section>
 
 </div>

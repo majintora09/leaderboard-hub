@@ -115,23 +115,32 @@ form,
 
 input,
 select,
-button {
+button,
+textarea {
     width: 100%;
     padding: 15px;
     border: none;
     border-radius: 14px;
     outline: none;
     font-size: 15px;
+    font-family: inherit;
 }
 
 input,
-select {
+select,
+textarea {
     background: rgba(226, 232, 240, 0.96);
     color: #0f172a;
 }
 
+textarea {
+    min-height: 105px;
+    resize: vertical;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.45);
 }
 
@@ -180,7 +189,7 @@ button:hover {
 .player {
     padding: 17px 16px;
     border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-    transition: background 0.15s ease, transform 0.15s ease;
+    transition: background 0.15s ease;
 }
 
 .player:last-child {
@@ -248,6 +257,55 @@ button:hover {
     color: #94a3b8;
 }
 
+.comment-form {
+    grid-template-columns: 220px 1fr 160px;
+    align-items: stretch;
+}
+
+#comments {
+    margin-top: 18px;
+    display: grid;
+    gap: 12px;
+}
+
+.comment {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(2, 6, 23, 0.38);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.comment-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.comment-name {
+    font-weight: bold;
+    color: #facc15;
+}
+
+.comment-date {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.comment-message {
+    color: #e2e8f0;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.comment-delete {
+    margin-top: 12px;
+    max-width: 90px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
 @media (max-width: 850px) {
     .hero {
         flex-direction: column;
@@ -282,6 +340,10 @@ button:hover {
 
     .delete-btn {
         margin-top: 8px;
+    }
+
+    .comment-form {
+        grid-template-columns: 1fr;
     }
 }
 
