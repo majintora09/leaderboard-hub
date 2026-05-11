@@ -7,25 +7,38 @@ body {
     min-height: 100vh;
     color: white;
     font-family: Arial, sans-serif;
-    background: #020617;
+    background: #030712;
 }
 
 .page-bg {
     position: fixed;
     inset: 0;
     background:
-        radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.28), transparent 32%),
-        radial-gradient(circle at 90% 5%, rgba(250, 204, 21, 0.16), transparent 28%),
-        radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.12), transparent 35%),
-        linear-gradient(135deg, #020617 0%, #0f172a 45%, #111827 100%);
+        linear-gradient(120deg, rgba(59, 130, 246, 0.12), transparent 28%),
+        linear-gradient(250deg, rgba(250, 204, 21, 0.08), transparent 30%),
+        radial-gradient(circle at 50% 0%, rgba(30, 64, 175, 0.28), transparent 35%),
+        linear-gradient(180deg, #020617 0%, #0f172a 48%, #020617 100%);
     z-index: -1;
 }
 
+.page-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
 .container {
-    max-width: 1180px;
+    max-width: 1220px;
     margin: 0 auto;
     padding: 42px 20px 70px;
 }
+
+/* HERO */
 
 .hero {
     display: flex;
@@ -33,12 +46,15 @@ body {
     align-items: center;
     gap: 24px;
     margin-bottom: 24px;
-    padding: 26px;
-    border-radius: 28px;
-    background: rgba(15, 23, 42, 0.72);
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.36);
-    backdrop-filter: blur(16px);
+    padding: 28px;
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.9));
+    border: 1px solid rgba(96, 165, 250, 0.28);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+        0 24px 80px rgba(0, 0, 0, 0.55),
+        0 0 40px rgba(37, 99, 235, 0.16);
+    clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
 }
 
 .hero-left {
@@ -48,15 +64,15 @@ body {
 }
 
 .logo-wrap {
-    width: 118px;
-    height: 118px;
-    border-radius: 24px;
+    width: 120px;
+    height: 120px;
     overflow: hidden;
     flex-shrink: 0;
-    border: 2px solid rgba(250, 204, 21, 0.5);
+    border: 2px solid rgba(250, 204, 21, 0.65);
     box-shadow:
-        0 0 35px rgba(250, 204, 21, 0.16),
-        inset 0 0 20px rgba(255, 255, 255, 0.08);
+        0 0 35px rgba(250, 204, 21, 0.22),
+        0 0 60px rgba(59, 130, 246, 0.16);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
 }
 
 .logo {
@@ -69,16 +85,19 @@ body {
     margin: 0 0 8px;
     color: #facc15;
     font-weight: 900;
-    letter-spacing: 1.2px;
+    letter-spacing: 1.6px;
     text-transform: uppercase;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 h1 {
     margin: 0;
-    font-size: 42px;
+    font-size: 44px;
     letter-spacing: 1px;
-    text-shadow: 0 5px 20px rgba(0, 0, 0, 0.45);
+    text-transform: uppercase;
+    text-shadow:
+        0 0 18px rgba(59, 130, 246, 0.35),
+        0 5px 20px rgba(0, 0, 0, 0.65);
 }
 
 .subtitle {
@@ -88,12 +107,13 @@ h1 {
 }
 
 .hero-badge {
-    min-width: 170px;
-    padding: 16px;
-    border-radius: 18px;
-    background: rgba(2, 6, 23, 0.45);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    min-width: 190px;
+    padding: 18px;
+    background: rgba(2, 6, 23, 0.72);
+    border: 1px solid rgba(34, 197, 94, 0.35);
     text-align: right;
+    box-shadow: 0 0 28px rgba(34, 197, 94, 0.08);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
 }
 
 .hero-badge span {
@@ -110,6 +130,8 @@ h1 {
     color: #22c55e;
 }
 
+/* STATS */
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -119,33 +141,40 @@ h1 {
 
 .stat-card {
     padding: 18px;
-    border-radius: 20px;
-    background: rgba(15, 23, 42, 0.66);
+    background:
+        linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.85));
     border: 1px solid rgba(148, 163, 184, 0.16);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.28);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
 
 .stat-card span {
     display: block;
     color: #94a3b8;
-    font-size: 13px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     margin-bottom: 8px;
 }
 
 .stat-card strong {
     display: block;
-    font-size: 28px;
+    font-size: 30px;
     color: #f8fafc;
 }
+
+/* CARDS */
 
 .card {
     margin-bottom: 24px;
     padding: 22px;
-    border-radius: 24px;
-    background: rgba(15, 23, 42, 0.76);
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
-    backdrop-filter: blur(12px);
+    background:
+        linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.88));
+    border: 1px solid rgba(96, 165, 250, 0.16);
+    box-shadow:
+        0 18px 55px rgba(0, 0, 0, 0.36),
+        0 0 32px rgba(37, 99, 235, 0.06);
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
 }
 
 .section-header {
@@ -159,6 +188,8 @@ h1 {
 .section-header h2 {
     margin: 0;
     font-size: 21px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
 .section-header p {
@@ -166,6 +197,8 @@ h1 {
     color: #94a3b8;
     font-size: 14px;
 }
+
+/* FORMS */
 
 .result-form,
 .filters {
@@ -181,7 +214,6 @@ textarea {
     width: 100%;
     padding: 15px;
     border: none;
-    border-radius: 15px;
     outline: none;
     font-size: 15px;
     font-family: inherit;
@@ -190,8 +222,15 @@ textarea {
 input,
 select,
 textarea {
-    background: rgba(226, 232, 240, 0.96);
-    color: #0f172a;
+    background: rgba(15, 23, 42, 0.96);
+    color: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #64748b;
 }
 
 textarea {
@@ -202,37 +241,44 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.45);
+    border-color: rgba(96, 165, 250, 0.85);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
 }
 
 button {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: white;
     cursor: pointer;
     font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
 }
 
 button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
-    filter: brightness(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.42);
+    filter: brightness(1.08);
 }
 
 .checkbox-field {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(226, 232, 240, 0.96);
-    color: #0f172a;
+    background: rgba(15, 23, 42, 0.96);
+    color: #f8fafc;
     padding: 15px;
-    border-radius: 15px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
     font-weight: 900;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
 }
 
 .checkbox-field input {
     width: auto;
 }
+
+/* LEADERBOARD */
 
 .leaderboard-card {
     padding-bottom: 0;
@@ -248,23 +294,40 @@ button:hover {
 }
 
 .leaderboard-header {
-    padding: 13px 16px;
+    padding: 15px 16px;
     color: #94a3b8;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 1.2px;
     border-top: 1px solid rgba(148, 163, 184, 0.14);
     border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-    background: rgba(2, 6, 23, 0.35);
+    background: rgba(2, 6, 23, 0.58);
 }
 
 #leaderboard {
-    background: rgba(15, 23, 42, 0.15);
+    background: rgba(2, 6, 23, 0.2);
 }
 
 .result-card {
-    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    position: relative;
+}
+
+.result-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    background: transparent;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.result-card:hover::before {
+    background: #3b82f6;
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.7);
 }
 
 .result-card:last-child {
@@ -272,33 +335,33 @@ button:hover {
 }
 
 .player {
-    padding: 17px 16px;
+    padding: 18px 16px;
     transition: background 0.15s ease;
 }
 
 .player:hover {
-    background: rgba(51, 65, 85, 0.6);
+    background: rgba(30, 41, 59, 0.72);
 }
 
 .rank {
     font-weight: 900;
     color: white;
-    font-size: 18px;
+    font-size: 19px;
 }
 
 .rank.first {
     color: #facc15;
-    text-shadow: 0 0 14px rgba(250, 204, 21, 0.75);
+    text-shadow: 0 0 14px rgba(250, 204, 21, 0.8);
 }
 
 .rank.second {
     color: #cbd5e1;
-    text-shadow: 0 0 12px rgba(203, 213, 225, 0.4);
+    text-shadow: 0 0 12px rgba(203, 213, 225, 0.35);
 }
 
 .rank.third {
     color: #cd7f32;
-    text-shadow: 0 0 12px rgba(205, 127, 50, 0.5);
+    text-shadow: 0 0 12px rgba(205, 127, 50, 0.45);
 }
 
 .name {
@@ -310,30 +373,51 @@ button:hover {
     font-weight: 900;
 }
 
+/* ANGULAR TAGS */
+
 .track,
 .game,
-.category {
+.category,
+.recording-badge,
+.no-recording-badge {
     display: inline-flex;
     width: fit-content;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 13px;
+    padding: 7px 11px;
+    font-size: 12px;
     font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
 }
 
 .track {
     color: #bae6fd;
-    background: rgba(56, 189, 248, 0.12);
+    background: rgba(56, 189, 248, 0.14);
+    border: 1px solid rgba(56, 189, 248, 0.22);
 }
 
 .game {
     color: #fed7aa;
-    background: rgba(245, 158, 11, 0.12);
+    background: rgba(245, 158, 11, 0.13);
+    border: 1px solid rgba(245, 158, 11, 0.22);
 }
 
 .category {
     color: #e9d5ff;
-    background: rgba(192, 132, 252, 0.12);
+    background: rgba(192, 132, 252, 0.14);
+    border: 1px solid rgba(192, 132, 252, 0.22);
+}
+
+.recording-badge {
+    color: #bbf7d0;
+    background: rgba(34, 197, 94, 0.14);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+}
+
+.no-recording-badge {
+    color: #cbd5e1;
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
 .result-description {
@@ -343,28 +427,8 @@ button:hover {
     line-height: 1.45;
     margin-top: -4px;
     padding: 12px;
-    border-radius: 14px;
-    background: rgba(2, 6, 23, 0.25);
-}
-
-.recording-badge,
-.no-recording-badge {
-    display: inline-flex;
-    width: fit-content;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 900;
-}
-
-.recording-badge {
-    color: #bbf7d0;
-    background: rgba(34, 197, 94, 0.14);
-}
-
-.no-recording-badge {
-    color: #cbd5e1;
-    background: rgba(148, 163, 184, 0.12);
+    background: rgba(2, 6, 23, 0.35);
+    border-left: 2px solid rgba(59, 130, 246, 0.55);
 }
 
 .actions {
@@ -376,7 +440,7 @@ button:hover {
     background: rgba(59, 130, 246, 0.18);
     color: #bfdbfe;
     padding: 9px 10px;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .comment-toggle:hover {
@@ -393,10 +457,12 @@ button:hover {
     box-shadow: 0 12px 28px rgba(239, 68, 68, 0.28);
 }
 
+/* COMMENTS */
+
 .comment-panel {
     display: none;
     padding: 16px;
-    background: rgba(2, 6, 23, 0.34);
+    background: rgba(2, 6, 23, 0.45);
     border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 
@@ -413,9 +479,8 @@ button:hover {
 
 .lap-comment {
     padding: 13px;
-    border-left: 3px solid rgba(59, 130, 246, 0.55);
-    background: rgba(15, 23, 42, 0.65);
-    border-radius: 12px;
+    border-left: 3px solid rgba(59, 130, 246, 0.65);
+    background: rgba(15, 23, 42, 0.72);
     margin-bottom: 10px;
 }
 
@@ -455,6 +520,8 @@ button:hover {
     text-align: center;
     color: #94a3b8;
 }
+
+/* RESPONSIVE */
 
 @media (max-width: 1050px) {
     .leaderboard-header {
@@ -520,7 +587,6 @@ button:hover {
     .card,
     .hero {
         padding: 18px;
-        border-radius: 18px;
     }
 
     .logo-wrap {
